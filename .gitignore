@@ -1,0 +1,13 @@
+.env
+vendor/
+node_modules/
+
+# fichiers système
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+# fichiers temporaires
+*.tmp
