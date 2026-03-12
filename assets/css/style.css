@@ -1,0 +1,88 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f8f4;
+    color: #1f2937;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.site-header {
+    background-color: #2e7d32;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.site-header h1 {
+    margin: 0 0 10px;
+    font-size: 2.5rem;
+}
+
+.site-header p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.hero {
+    margin: 40px 0 20px;
+    text-align: center;
+}
+
+.hero h2 {
+    margin-bottom: 10px;
+    color: #2e7d32;
+}
+
+.search-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 40px;
+}
+
+.search-card h2 {
+    margin-top: 0;
+    color: #2e7d32;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #256628;
+}
