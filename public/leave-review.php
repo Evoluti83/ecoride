@@ -1,8 +1,11 @@
 <?php
+
 session_start();
 require_once "../config/database.php";
 
-// Vérification si l'utilisateur est connecté
+$message = '';
+
+// Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit;
@@ -33,12 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rating = $_POST['rating'] ?? null;
     $comment = $_POST['comment'] ?? '';
 
-    // Vérification que tous les champs sont remplis
+    // Validation : vérifier que la note est entre 1 et 5 et que le commentaire n'est pas vide
     if ($rating && !empty($comment)) {
-        // Vérifier que la note est entre 1 et 5
         if ($rating < 1 || $rating > 5) {
             $message = "La note doit être comprise entre 1 et 5.";
         } else {
+            // Prévenir les attaques XSS en échappant le commentaire
+            $comment = htmlspecialchars($comment, ENT_QUOTES, 'UTF-8');
+            
             // Insertion de l'avis dans la base de données avec le statut 'pending'
             $sqlReview = "INSERT INTO reviews (ride_id, author_id, driver_id, rating, comment, status)
                           VALUES (:ride_id, :author_id, :driver_id, :rating, :comment, 'pending')";
@@ -87,15 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
+        <!-- Formulaire d'avis -->
         <form method="POST" action="">
             <div class="form-group">
                 <label for="rating">Note (sur 5)</label>
-                <input type="number" id="rating" name="rating" min="1" max="5" required>
+                <input type="number" id="rating" name="rating" min="1" max="5" required placeholder="Entrez une note entre 1 et 5">
             </div>
 
             <div class="form-group">
                 <label for="comment">Commentaire</label>
-                <textarea id="comment" name="comment" required></textarea>
+                <textarea id="comment" name="comment" required placeholder="Votre commentaire ici..."></textarea>
             </div>
 
             <button type="submit">Soumettre l'avis</button>

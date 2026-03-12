@@ -9,34 +9,46 @@ $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
+    $rememberMe = isset($_POST['remember_me']) ? true : false;  // Récupère l'option "Se souvenir de moi"
 
     // Validation des champs
     if (!empty($email) && !empty($password)) {
-        $sql = "SELECT * FROM users WHERE email = :email";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch();
-
-        // Vérification du mot de passe
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user'] = [
-                'id' => $user['id'],
-                'pseudo' => $user['pseudo'],
-                'email' => $user['email'],
-                'role' => $user['role'],
-                'credits' => $user['credits']
-            ];
-
-            header("Location: dashboard.php");
-            exit;
+        // Validation de l'email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = "Veuillez entrer une adresse email valide.";
         } else {
-            $message = "Email ou mot de passe incorrect.";
+            // Vérification dans la base de données
+            $sql = "SELECT * FROM users WHERE email = :email";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(['email' => $email]);
+            $user = $stmt->fetch();
+
+            // Vérification du mot de passe
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['user'] = [
+                    'id' => $user['id'],
+                    'pseudo' => $user['pseudo'],
+                    'email' => $user['email'],
+                    'role' => $user['role'],
+                    'credits' => $user['credits']
+                ];
+
+                // Gérer "Se souvenir de moi" avec un cookie sécurisé
+                if ($rememberMe) {
+                    $expireTime = time() + 60 * 60 * 24 * 30; // 30 jours
+                    setcookie('remember_me', $user['id'], $expireTime, '/', '', true, true); // secure et HttpOnly
+                }
+
+                header("Location: dashboard.php");
+                exit;
+            } else {
+                $message = "Email ou mot de passe incorrect.";
+            }
         }
     } else {
         $message = "Veuillez remplir tous les champs.";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -62,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Message d'erreur ou succès -->
         <?php if (!empty($message)): ?>
-            <div class="alert error">
+            <div class="alert <?= (strpos($message, 'incorrect') !== false) ? 'error' : 'success' ?>">
                 <?= htmlspecialchars($message) ?>
             </div>
         <?php endif; ?>
@@ -78,6 +90,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="password" id="password" name="password" required placeholder="********">
             </div>
 
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="remember_me">
+                    Se souvenir de moi
+                </label>
+            </div>
+
             <button type="submit">Se connecter</button>
         </form>
 
@@ -86,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </main>
 
 <script>
-    // Ajout de la validation en JavaScript
+    // Validation côté client
     $('#loginForm').on('submit', function(event) {
         var email = $('#email').val().trim();
         var password = $('#password').val().trim();

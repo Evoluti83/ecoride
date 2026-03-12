@@ -13,45 +13,73 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 
 /*
-    Recharger les données utilisateur depuis la base
+    On récupère les véhicules de l'utilisateur connecté
 */
-$sqlCurrentUser = "SELECT * FROM users WHERE id = :id";
-$stmtCurrentUser = $pdo->prepare($sqlCurrentUser);
-$stmtCurrentUser->execute(['id' => $user['id']]);
-$currentUser = $stmtCurrentUser->fetch();
+$sqlVehicles = "SELECT * FROM vehicles WHERE user_id = :user_id";
+$stmtVehicles = $pdo->prepare($sqlVehicles);
+$stmtVehicles->execute(['user_id' => $user['id']]);
+$vehicles = $stmtVehicles->fetchAll();
 
-if ($currentUser) {
-    $_SESSION['user']['credits'] = $currentUser['credits'];
-    $_SESSION['user']['pseudo'] = $currentUser['pseudo'];
-    $_SESSION['user']['email'] = $currentUser['email'];
-    $_SESSION['user']['role'] = $currentUser['role'];
-    $user = $_SESSION['user'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $vehicleId = $_POST['vehicle_id'] ?? '';
+    $departureCity = trim($_POST['departure_city'] ?? '');
+    $arrivalCity = trim($_POST['arrival_city'] ?? '');
+    $departureTime = $_POST['departure_time'] ?? '';
+    $arrivalTime = $_POST['arrival_time'] ?? '';
+    $price = $_POST['price'] ?? '';
+    $availableSeats = $_POST['available_seats'] ?? '';
+    $ecological = isset($_POST['ecological']) ? 1 : 0;
+
+    // Validation des données
+    if (
+        !empty($vehicleId) &&
+        !empty($departureCity) &&
+        !empty($arrivalCity) &&
+        !empty($departureTime) &&
+        !empty($arrivalTime) &&
+        $price !== '' &&
+        $availableSeats !== '' &&
+        is_numeric($price) &&
+        is_numeric($availableSeats) &&
+        strtotime($departureTime) !== false &&
+        strtotime($arrivalTime) !== false
+    ) {
+        try {
+            // Début de la transaction
+            $pdo->beginTransaction();
+
+            // Insertion du trajet
+            $sql = "INSERT INTO rides 
+                (driver_id, vehicle_id, departure_city, arrival_city, departure_time, arrival_time, price, available_seats, ecological)
+                VALUES
+                (:driver_id, :vehicle_id, :departure_city, :arrival_city, :departure_time, :arrival_time, :price, :available_seats, :ecological)";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                'driver_id' => $user['id'],
+                'vehicle_id' => $vehicleId,
+                'departure_city' => htmlspecialchars($departureCity),
+                'arrival_city' => htmlspecialchars($arrivalCity),
+                'departure_time' => $departureTime,
+                'arrival_time' => $arrivalTime,
+                'price' => $price,
+                'available_seats' => $availableSeats,
+                'ecological' => $ecological
+            ]);
+
+            // Commit de la transaction
+            $pdo->commit();
+            $message = "Trajet créé avec succès !";
+
+        } catch (Exception $e) {
+            // Rollback en cas d'erreur
+            $pdo->rollBack();
+            $message = "Une erreur est survenue lors de la création du trajet. Veuillez réessayer plus tard.";
+        }
+    } else {
+        $message = "Veuillez remplir tous les champs obligatoires avec des valeurs valides.";
+    }
 }
-
-/*
-    Réservations de l'utilisateur
-*/
-$sqlBookings = "SELECT bookings.booking_date, bookings.status, rides.departure_city, rides.arrival_city, rides.departure_time, rides.price
-FROM bookings
-INNER JOIN rides ON bookings.ride_id = rides.id
-WHERE bookings.user_id = :user_id
-ORDER BY bookings.booking_date DESC";
-
-$stmtBookings = $pdo->prepare($sqlBookings);
-$stmtBookings->execute(['user_id' => $user['id']]);
-$bookings = $stmtBookings->fetchAll();
-
-/*
-    Trajets proposés par l'utilisateur
-*/
-$sqlMyRides = "SELECT departure_city, arrival_city, departure_time, arrival_time, price, available_seats, ecological
-FROM rides
-WHERE driver_id = :driver_id
-ORDER BY departure_time DESC";
-
-$stmtMyRides = $pdo->prepare($sqlMyRides);
-$stmtMyRides->execute(['driver_id' => $user['id']]);
-$myRides = $stmtMyRides->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -65,7 +93,7 @@ $myRides = $stmtMyRides->fetchAll();
 
 <header class="site-header">
     <div class="container">
-        <h1>Tableau de bord</h1>
+        <h1>EcoRide</h1>
         <p>Bienvenue <?= htmlspecialchars($user['pseudo']) ?></p>
     </div>
 </header>

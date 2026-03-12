@@ -31,6 +31,7 @@ require_once "../config/database.php";
         <section class="search-card">
             <h2>Rechercher un trajet</h2>
 
+            <!-- Formulaire de recherche -->
             <form action="covoiturages.php" method="GET" id="searchForm">
                 <div class="form-group">
                     <label for="departure">Ville de départ</label>
@@ -51,6 +52,7 @@ require_once "../config/database.php";
             </form>
         </section>
 
+        <!-- Liens d'inscription et de connexion -->
         <section class="user-actions">
             <p>Vous n'êtes pas encore membre ? <a href="register.php">Inscrivez-vous ici</a> !</p>
             <p>Vous avez déjà un compte ? <a href="login.php">Connectez-vous</a></p>
@@ -63,11 +65,22 @@ require_once "../config/database.php";
             var departure = $('#departure').val().trim();
             var arrival = $('#arrival').val().trim();
             var date = $('#date').val().trim();
+            var errorMessage = '';
 
             // Validation de base
             if (departure === '' || arrival === '' || date === '') {
-                alert("Veuillez remplir tous les champs.");
-                event.preventDefault();
+                errorMessage = "Veuillez remplir tous les champs.";
+            }
+
+            // Validation de la date : vérifier que la date n'est pas dans le passé
+            var today = new Date().toISOString().split('T')[0]; // La date du jour
+            if (date < today) {
+                errorMessage = "La date de départ ne peut pas être dans le passé.";
+            }
+
+            if (errorMessage) {
+                event.preventDefault(); // Empêche l'envoi du formulaire
+                alert(errorMessage);
             }
         });
     </script>

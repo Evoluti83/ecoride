@@ -1,10 +1,10 @@
 <?php
-
 session_start();
 require_once "../config/database.php";
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
+    $_SESSION['error_message'] = "Veuillez vous connecter pour réserver un trajet.";
     header("Location: login.php");
     exit;
 }
@@ -100,7 +100,7 @@ try {
     $pdo->commit();
 
     // Message de succès
-    $_SESSION['success_message'] = "Réservation réussie ! Il vous reste " . ($_SESSION['user']['credits']) . " crédits.";
+    $_SESSION['success_message'] = "Réservation réussie ! Il vous reste " . $_SESSION['user']['credits'] . " crédits.";
     header("Location: dashboard.php");
     exit;
 

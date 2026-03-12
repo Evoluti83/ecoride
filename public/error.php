@@ -18,9 +18,10 @@ session_start();
 <main class="container">
     <h2>Oups ! Une erreur est survenue</h2>
 
+    <!-- Affichage du message d'erreur -->
     <?php if (isset($_SESSION['error_message'])): ?>
         <div class="alert error">
-            <?= $_SESSION['error_message']; ?>
+            <?= htmlspecialchars($_SESSION['error_message']); ?>
         </div>
         <?php unset($_SESSION['error_message']); ?>
     <?php else: ?>
@@ -29,9 +30,10 @@ session_start();
         </div>
     <?php endif; ?>
 
-    <div>
-        <p><a href="covoiturages.php">Retour à la recherche des trajets</a></p>
-        <p><a href="dashboard.php">Retour à mon tableau de bord</a></p>
+    <!-- Options de navigation -->
+    <div class="navigation-options">
+        <p><a href="covoiturages.php" class="button-link">Retour à la recherche des trajets</a></p>
+        <p><a href="dashboard.php" class="button-link">Retour à mon tableau de bord</a></p>
     </div>
 </main>
 

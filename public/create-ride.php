@@ -59,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([
                 'driver_id' => $user['id'],
                 'vehicle_id' => $vehicleId,
-                'departure_city' => $departureCity,
-                'arrival_city' => $arrivalCity,
+                'departure_city' => htmlspecialchars($departureCity),
+                'arrival_city' => htmlspecialchars($arrivalCity),
                 'departure_time' => $departureTime,
                 'arrival_time' => $arrivalTime,
                 'price' => $price,
@@ -104,7 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Nouveau trajet</h2>
 
         <?php if (!empty($message)): ?>
-            <p class="message"><?= htmlspecialchars($message) ?></p>
+            <div class="alert <?= (strpos($message, 'succès') !== false) ? 'success' : 'error' ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
         <?php endif; ?>
 
         <?php if (empty($vehicles)): ?>

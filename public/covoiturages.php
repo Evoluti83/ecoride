@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 require_once "../config/database.php";
 
@@ -11,6 +10,15 @@ $price = $_GET['price'] ?? '';
 $ecology = $_GET['ecology'] ?? '';
 $duration = $_GET['duration'] ?? '';
 $rating = $_GET['rating'] ?? '';
+
+// Validation et sécurisation des entrées utilisateur
+$departure = htmlspecialchars($departure);
+$arrival = htmlspecialchars($arrival);
+$date = htmlspecialchars($date);
+$price = is_numeric($price) ? (int) $price : '';  // Assurer que price est un nombre
+$ecology = $ecology === '1' || $ecology === '0' ? $ecology : '';
+$duration = is_numeric($duration) ? (int) $duration : '';
+$rating = is_numeric($rating) && $rating >= 1 && $rating <= 5 ? (int) $rating : '';
 
 // Pagination : déterminer la page actuelle et le nombre d'éléments par page
 $page = $_GET['page'] ?? 1;
@@ -78,7 +86,6 @@ $stmtCount->execute([
 
 $totalRides = $stmtCount->fetchColumn();
 $totalPages = ceil($totalRides / $limit);
-
 ?>
 
 <!DOCTYPE html>

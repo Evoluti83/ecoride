@@ -9,28 +9,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    // Validation côté serveur : vérifier que les champs ne sont pas vides
     if (!empty($pseudo) && !empty($email) && !empty($password)) {
-        $checkSql = "SELECT id FROM users WHERE email = :email";
-        $checkStmt = $pdo->prepare($checkSql);
-        $checkStmt->execute(['email' => $email]);
-        $existingUser = $checkStmt->fetch();
 
-        if ($existingUser) {
-            $message = "Cette adresse email est déjà utilisée.";
+        // Vérifier si l'email est valide
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = "Veuillez entrer une adresse email valide.";
         } else {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            // Vérifier si l'email existe déjà
+            $checkSql = "SELECT id FROM users WHERE email = :email";
+            $checkStmt = $pdo->prepare($checkSql);
+            $checkStmt->execute(['email' => $email]);
+            $existingUser = $checkStmt->fetch();
 
-            $sql = "INSERT INTO users (pseudo, email, password, credits, role)
-                    VALUES (:pseudo, :email, :password, 20, 'user')";
+            if ($existingUser) {
+                $message = "Cette adresse email est déjà utilisée.";
+            } else {
+                // Hacher le mot de passe
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                'pseudo' => $pseudo,
-                'email' => $email,
-                'password' => $hashedPassword
-            ]);
+                // Insérer le nouvel utilisateur
+                $sql = "INSERT INTO users (pseudo, email, password, credits, role)
+                        VALUES (:pseudo, :email, :password, 20, 'user')";
 
-            $message = "Compte créé avec succès !";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    'pseudo' => $pseudo,
+                    'email' => $email,
+                    'password' => $hashedPassword
+                ]);
+
+                $message = "Compte créé avec succès ! Vous pouvez maintenant vous connecter.";
+                // Redirection vers la page de connexion
+                header("Location: login.php");
+                exit;
+            }
         }
     } else {
         $message = "Veuillez remplir tous les champs.";
@@ -58,10 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <section class="search-card">
         <h2>Inscription</h2>
 
+        <!-- Affichage des messages flash -->
         <?php if (!empty($message)): ?>
-            <p><?= htmlspecialchars($message) ?></p>
+            <div class="alert <?= (strpos($message, 'succès') !== false) ? 'success' : 'error' ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
         <?php endif; ?>
 
+        <!-- Formulaire d'inscription -->
         <form method="POST" action="">
             <div class="form-group">
                 <label for="pseudo">Pseudo</label>

@@ -1,7 +1,9 @@
+/* Resetting box-sizing for all elements */
 * {
     box-sizing: border-box;
 }
 
+/* Styling for the body of the page */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -9,12 +11,14 @@ body {
     color: #1f2937;
 }
 
+/* Container to limit the width of the content */
 .container {
     width: 90%;
     max-width: 1000px;
     margin: 0 auto;
 }
 
+/* Styling for the site header */
 .site-header {
     background-color: #2e7d32;
     color: white;
@@ -32,6 +36,7 @@ body {
     font-size: 1.1rem;
 }
 
+/* Hero section style */
 .hero {
     margin: 40px 0 20px;
     text-align: center;
@@ -42,6 +47,7 @@ body {
     color: #2e7d32;
 }
 
+/* Styling for search card (forms and inputs) */
 .search-card {
     background: white;
     border-radius: 12px;
@@ -55,16 +61,19 @@ body {
     color: #2e7d32;
 }
 
+/* Form group styles for spacing between form elements */
 .form-group {
     margin-bottom: 18px;
 }
 
+/* Label styles */
 label {
     display: block;
     margin-bottom: 6px;
     font-weight: bold;
 }
 
+/* Styling for input elements */
 input {
     width: 100%;
     padding: 12px;
@@ -73,6 +82,7 @@ input {
     font-size: 1rem;
 }
 
+/* Button styles */
 button {
     background-color: #2e7d32;
     color: white;
@@ -87,6 +97,7 @@ button:hover {
     background-color: #256628;
 }
 
+/* Styling for select dropdown elements */
 select {
     width: 100%;
     padding: 12px;
@@ -96,6 +107,7 @@ select {
     background-color: white;
 }
 
+/* Styles for alert messages (error and success) */
 .alert {
     padding: 15px;
     border-radius: 5px;
@@ -112,4 +124,27 @@ select {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
+}
+
+.review {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.review strong {
+    font-size: 1.2rem;
+    color: #2e7d32;
+}
+
+.review p {
+    font-size: 1rem;
+    color: #333;
+}
+
+.review i {
+    font-style: italic;
+    color: #555;
 }

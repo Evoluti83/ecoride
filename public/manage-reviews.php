@@ -16,16 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($reviewId && $action) {
-        if ($action === 'approve') {
-            $sqlUpdate = "UPDATE reviews SET status = 'approved' WHERE id = :review_id";
-        } elseif ($action === 'reject') {
-            $sqlUpdate = "UPDATE reviews SET status = 'rejected' WHERE id = :review_id";
+        try {
+            // Préparer la mise à jour du statut de l'avis
+            if ($action === 'approve') {
+                $sqlUpdate = "UPDATE reviews SET status = 'approved' WHERE id = :review_id";
+            } elseif ($action === 'reject') {
+                $sqlUpdate = "UPDATE reviews SET status = 'rejected' WHERE id = :review_id";
+            }
+
+            $stmtUpdate = $pdo->prepare($sqlUpdate);
+            $stmtUpdate->execute(['review_id' => $reviewId]);
+
+            $message = "Avis mis à jour avec succès.";
+
+        } catch (Exception $e) {
+            $message = "Une erreur est survenue. Veuillez réessayer.";
         }
-
-        $stmtUpdate = $pdo->prepare($sqlUpdate);
-        $stmtUpdate->execute(['review_id' => $reviewId]);
-
-        $message = "Avis mis à jour avec succès.";
     }
 }
 
@@ -55,7 +61,9 @@ $pendingReviews = $stmtPendingReviews->fetchAll();
     <h2>Avis en attente de validation</h2>
 
     <?php if (!empty($message)): ?>
-        <p><?= htmlspecialchars($message) ?></p>
+        <div class="alert <?= (strpos($message, 'succès') !== false) ? 'success' : 'error' ?>">
+            <?= htmlspecialchars($message) ?>
+        </div>
     <?php endif; ?>
 
     <?php if (empty($pendingReviews)): ?>
@@ -78,8 +86,8 @@ $pendingReviews = $stmtPendingReviews->fetchAll();
                     <td>
                         <form method="POST" action="">
                             <input type="hidden" name="review_id" value="<?= $review['id'] ?>">
-                            <button type="submit" name="action" value="approve">Approuver</button>
-                            <button type="submit" name="action" value="reject">Rejeter</button>
+                            <button type="submit" name="action" value="approve" class="approve-btn">Approuver</button>
+                            <button type="submit" name="action" value="reject" class="reject-btn">Rejeter</button>
                         </form>
                     </td>
                 </tr>
@@ -90,3 +98,51 @@ $pendingReviews = $stmtPendingReviews->fetchAll();
 
 </body>
 </html>
+
+<style>
+    /* Styles supplémentaires pour améliorer l'UX des boutons */
+    .approve-btn {
+        background-color: #28a745; /* Vert pour "Approuver" */
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .approve-btn:hover {
+        background-color: #218838;
+    }
+
+    .reject-btn {
+        background-color: #dc3545; /* Rouge pour "Rejeter" */
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .reject-btn:hover {
+        background-color: #c82333;
+    }
+
+    /* Alerte pour le message de succès ou d'erreur */
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .alert.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
