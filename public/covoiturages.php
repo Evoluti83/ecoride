@@ -50,15 +50,25 @@ $rides = $stmt->fetchAll();
 <?php foreach($rides as $ride): ?>
 
 <li>
+
 <strong>
 <?= htmlspecialchars($ride['departure_city']) ?>
 →
 <?= htmlspecialchars($ride['arrival_city']) ?>
 </strong>
+
 <br>
 Prix : <?= $ride['price'] ?> crédits
+
 <br>
 Places disponibles : <?= $ride['available_seats'] ?>
+
+<br><br>
+
+<a href="book-ride.php?ride_id=<?= $ride['id'] ?>">
+Réserver
+</a>
+
 </li>
 
 <?php endforeach; ?>
