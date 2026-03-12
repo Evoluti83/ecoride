@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+require_once "../config/database.php";
 
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
@@ -8,6 +9,32 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
+
+/*
+    Recharger les crédits depuis la base pour être sûr d'avoir la bonne valeur
+*/
+$sqlCurrentUser = "SELECT * FROM users WHERE id = :id";
+$stmtCurrentUser = $pdo->prepare($sqlCurrentUser);
+$stmtCurrentUser->execute(['id' => $user['id']]);
+$currentUser = $stmtCurrentUser->fetch();
+
+if ($currentUser) {
+    $_SESSION['user']['credits'] = $currentUser['credits'];
+    $user = $_SESSION['user'];
+}
+
+/*
+    Récupérer les réservations de l'utilisateur connecté
+*/
+$sqlBookings = "SELECT bookings.booking_date, bookings.status, rides.departure_city, rides.arrival_city, rides.departure_time, rides.price
+FROM bookings
+INNER JOIN rides ON bookings.ride_id = rides.id
+WHERE bookings.user_id = :user_id
+ORDER BY bookings.booking_date DESC";
+
+$stmtBookings = $pdo->prepare($sqlBookings);
+$stmtBookings->execute(['user_id' => $user['id']]);
+$bookings = $stmtBookings->fetchAll();
 
 ?>
 
@@ -35,12 +62,45 @@ $user = $_SESSION['user'];
         <p><strong>Crédits :</strong> <?= htmlspecialchars($user['credits']) ?></p>
 
         <p>
-    <a href="create-ride.php">Proposer un trajet</a>
+            <a href="index.php">Rechercher un trajet</a>
         </p>
-        
+
+        <p>
+            <a href="create-ride.php">Proposer un trajet</a>
+        </p>
+
         <p>
             <a href="logout.php">Se déconnecter</a>
         </p>
+    </section>
+
+    <section class="search-card">
+        <h2>Mes réservations</h2>
+
+        <?php if (empty($bookings)): ?>
+            <p>Aucune réservation enregistrée.</p>
+        <?php else: ?>
+            <ul>
+                <?php foreach ($bookings as $booking): ?>
+                    <li>
+                        <strong>
+                            <?= htmlspecialchars($booking['departure_city']) ?>
+                            →
+                            <?= htmlspecialchars($booking['arrival_city']) ?>
+                        </strong>
+                        <br>
+                        Date du trajet : <?= htmlspecialchars($booking['departure_time']) ?>
+                        <br>
+                        Prix : <?= htmlspecialchars($booking['price']) ?> crédits
+                        <br>
+                        Statut : <?= htmlspecialchars($booking['status']) ?>
+                        <br>
+                        Réservé le : <?= htmlspecialchars($booking['booking_date']) ?>
+                    </li>
+                    <br>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
     </section>
 </main>
 
