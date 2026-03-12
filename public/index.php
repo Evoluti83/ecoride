@@ -9,6 +9,7 @@ require_once "../config/database.php";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoRide - Accueil</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <header class="site-header">
@@ -30,7 +31,7 @@ require_once "../config/database.php";
         <section class="search-card">
             <h2>Rechercher un trajet</h2>
 
-            <form action="covoiturages.php" method="GET">
+            <form action="covoiturages.php" method="GET" id="searchForm">
                 <div class="form-group">
                     <label for="departure">Ville de départ</label>
                     <input type="text" id="departure" name="departure" placeholder="Ex : Marseille" required>
@@ -46,9 +47,29 @@ require_once "../config/database.php";
                     <input type="date" id="date" name="date" required>
                 </div>
 
-                <button type="submit">Rechercher</button>
+                <button type="submit" id="searchBtn">Rechercher</button>
             </form>
         </section>
+
+        <section class="user-actions">
+            <p>Vous n'êtes pas encore membre ? <a href="register.php">Inscrivez-vous ici</a> !</p>
+            <p>Vous avez déjà un compte ? <a href="login.php">Connectez-vous</a></p>
+        </section>
     </main>
+
+    <script>
+        // Ajout d'une validation rapide en JavaScript
+        $('#searchForm').on('submit', function(event) {
+            var departure = $('#departure').val().trim();
+            var arrival = $('#arrival').val().trim();
+            var date = $('#date').val().trim();
+
+            // Validation de base
+            if (departure === '' || arrival === '' || date === '') {
+                alert("Veuillez remplir tous les champs.");
+                event.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

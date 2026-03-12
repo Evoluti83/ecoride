@@ -3,13 +3,15 @@
 session_start();
 require_once "../config/database.php";
 
+$message = "";
+
+// Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit;
 }
 
 $user = $_SESSION['user'];
-$message = "";
 
 /*
     On récupère les véhicules de l'utilisateur connecté
@@ -29,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $availableSeats = $_POST['available_seats'] ?? '';
     $ecological = isset($_POST['ecological']) ? 1 : 0;
 
+    // Validation des données
     if (
         !empty($vehicleId) &&
         !empty($departureCity) &&
@@ -36,29 +39,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         !empty($departureTime) &&
         !empty($arrivalTime) &&
         $price !== '' &&
-        $availableSeats !== ''
+        $availableSeats !== '' &&
+        is_numeric($price) &&
+        is_numeric($availableSeats) &&
+        strtotime($departureTime) !== false &&
+        strtotime($arrivalTime) !== false
     ) {
-        $sql = "INSERT INTO rides 
-            (driver_id, vehicle_id, departure_city, arrival_city, departure_time, arrival_time, price, available_seats, ecological)
-            VALUES
-            (:driver_id, :vehicle_id, :departure_city, :arrival_city, :departure_time, :arrival_time, :price, :available_seats, :ecological)";
+        try {
+            // Début de la transaction
+            $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            'driver_id' => $user['id'],
-            'vehicle_id' => $vehicleId,
-            'departure_city' => $departureCity,
-            'arrival_city' => $arrivalCity,
-            'departure_time' => $departureTime,
-            'arrival_time' => $arrivalTime,
-            'price' => $price,
-            'available_seats' => $availableSeats,
-            'ecological' => $ecological
-        ]);
+            // Insertion du trajet
+            $sql = "INSERT INTO rides 
+                (driver_id, vehicle_id, departure_city, arrival_city, departure_time, arrival_time, price, available_seats, ecological)
+                VALUES
+                (:driver_id, :vehicle_id, :departure_city, :arrival_city, :departure_time, :arrival_time, :price, :available_seats, :ecological)";
 
-        $message = "Trajet créé avec succès !";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                'driver_id' => $user['id'],
+                'vehicle_id' => $vehicleId,
+                'departure_city' => $departureCity,
+                'arrival_city' => $arrivalCity,
+                'departure_time' => $departureTime,
+                'arrival_time' => $arrivalTime,
+                'price' => $price,
+                'available_seats' => $availableSeats,
+                'ecological' => $ecological
+            ]);
+
+            // Commit de la transaction
+            $pdo->commit();
+            $message = "Trajet créé avec succès !";
+
+        } catch (Exception $e) {
+            // Rollback en cas d'erreur
+            $pdo->rollBack();
+            $message = "Une erreur est survenue lors de la création du trajet. Veuillez réessayer plus tard.";
+        }
     } else {
-        $message = "Veuillez remplir tous les champs obligatoires.";
+        $message = "Veuillez remplir tous les champs obligatoires avec des valeurs valides.";
     }
 }
 ?>
@@ -84,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Nouveau trajet</h2>
 
         <?php if (!empty($message)): ?>
-            <p><?= htmlspecialchars($message) ?></p>
+            <p class="message"><?= htmlspecialchars($message) ?></p>
         <?php endif; ?>
 
         <?php if (empty($vehicles)): ?>

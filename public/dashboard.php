@@ -1,8 +1,10 @@
 <?php
-
 session_start();
 require_once "../config/database.php";
 
+$message = "";
+
+// Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit;
@@ -50,7 +52,6 @@ ORDER BY departure_time DESC";
 $stmtMyRides = $pdo->prepare($sqlMyRides);
 $stmtMyRides->execute(['driver_id' => $user['id']]);
 $myRides = $stmtMyRides->fetchAll();
-
 ?>
 
 <!DOCTYPE html>
@@ -70,6 +71,21 @@ $myRides = $stmtMyRides->fetchAll();
 </header>
 
 <main class="container">
+    <!-- Messages flash -->
+    <?php if (isset($_SESSION['success_message'])): ?>
+        <div class="alert success">
+            <?= $_SESSION['success_message']; ?>
+        </div>
+        <?php unset($_SESSION['success_message']); ?>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error_message'])): ?>
+        <div class="alert error">
+            <?= $_SESSION['error_message']; ?>
+        </div>
+        <?php unset($_SESSION['error_message']); ?>
+    <?php endif; ?>
+
     <section class="search-card">
         <h2>Mon espace</h2>
         <p><strong>Email :</strong> <?= htmlspecialchars($user['email']) ?></p>

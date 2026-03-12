@@ -1,5 +1,6 @@
 <?php
 
+session_start();
 require_once "../config/database.php";
 
 // Récupérer les valeurs des filtres depuis l'URL
@@ -10,6 +11,11 @@ $price = $_GET['price'] ?? '';
 $ecology = $_GET['ecology'] ?? '';
 $duration = $_GET['duration'] ?? '';
 $rating = $_GET['rating'] ?? '';
+
+// Pagination : déterminer la page actuelle et le nombre d'éléments par page
+$page = $_GET['page'] ?? 1;
+$limit = 10;  // Nombre de trajets par page
+$offset = ($page - 1) * $limit;
 
 // Construction de la requête SQL avec filtres
 $sql = "SELECT * FROM rides WHERE departure_city LIKE :departure AND arrival_city LIKE :arrival";
@@ -28,13 +34,18 @@ if ($rating) {
     $sql .= " AND rating >= :rating";
 }
 
+// Ajouter la pagination à la requête SQL
+$sql .= " LIMIT :limit OFFSET :offset";
+
 // Préparer la requête SQL
 $stmt = $pdo->prepare($sql);
 
 // Lier les paramètres de la requête SQL
 $params = [
     'departure' => "%$departure%",
-    'arrival' => "%$arrival%"
+    'arrival' => "%$arrival%",
+    'limit' => $limit,
+    'offset' => $offset
 ];
 
 // Ajouter les filtres aux paramètres SQL si définis
@@ -56,6 +67,17 @@ $stmt->execute($params);
 
 // Récupérer tous les trajets correspondant aux filtres
 $rides = $stmt->fetchAll();
+
+// Récupérer le nombre total de trajets pour la pagination
+$sqlCount = "SELECT COUNT(*) FROM rides WHERE departure_city LIKE :departure AND arrival_city LIKE :arrival";
+$stmtCount = $pdo->prepare($sqlCount);
+$stmtCount->execute([
+    'departure' => "%$departure%",
+    'arrival' => "%$arrival%"
+]);
+
+$totalRides = $stmtCount->fetchColumn();
+$totalPages = ceil($totalRides / $limit);
 
 ?>
 
@@ -139,6 +161,21 @@ $rides = $stmt->fetchAll();
             <?php endforeach; ?>
 
         </ul>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <?php if ($page > 1): ?>
+                <a href="covoiturages.php?page=<?= $page - 1 ?>">&laquo; Précédent</a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="covoiturages.php?page=<?= $i ?>" <?= ($i == $page) ? 'class="active"' : '' ?>><?= $i ?></a>
+            <?php endfor; ?>
+
+            <?php if ($page < $totalPages): ?>
+                <a href="covoiturages.php?page=<?= $page + 1 ?>">Suivant &raquo;</a>
+            <?php endif; ?>
+        </div>
 
     <?php endif; ?>
 

@@ -35,20 +35,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Vérification que tous les champs sont remplis
     if ($rating && !empty($comment)) {
-        // Insertion de l'avis dans la base de données avec le statut 'pending'
-        $sqlReview = "INSERT INTO reviews (ride_id, author_id, driver_id, rating, comment, status)
-                      VALUES (:ride_id, :author_id, :driver_id, :rating, :comment, 'pending')";
+        // Vérifier que la note est entre 1 et 5
+        if ($rating < 1 || $rating > 5) {
+            $message = "La note doit être comprise entre 1 et 5.";
+        } else {
+            // Insertion de l'avis dans la base de données avec le statut 'pending'
+            $sqlReview = "INSERT INTO reviews (ride_id, author_id, driver_id, rating, comment, status)
+                          VALUES (:ride_id, :author_id, :driver_id, :rating, :comment, 'pending')";
 
-        $stmtReview = $pdo->prepare($sqlReview);
-        $stmtReview->execute([
-            'ride_id' => $rideId,
-            'author_id' => $user['id'],
-            'driver_id' => $ride['driver_id'],
-            'rating' => $rating,
-            'comment' => $comment
-        ]);
+            $stmtReview = $pdo->prepare($sqlReview);
+            $stmtReview->execute([
+                'ride_id' => $rideId,
+                'author_id' => $user['id'],
+                'driver_id' => $ride['driver_id'],
+                'rating' => $rating,
+                'comment' => $comment
+            ]);
 
-        $message = "Merci pour votre avis. Il sera soumis à validation.";
+            $message = "Merci pour votre avis. Il sera soumis à validation.";
+        }
     } else {
         $message = "Veuillez compléter tous les champs.";
     }
@@ -75,8 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <section class="search-card">
         <h2>Donner un avis pour le trajet <?= htmlspecialchars($ride['departure_city']) ?> → <?= htmlspecialchars($ride['arrival_city']) ?></h2>
 
+        <!-- Affichage des messages flash -->
         <?php if (!empty($message)): ?>
-            <p><?= htmlspecialchars($message) ?></p>
+            <div class="alert <?= (strpos($message, 'Merci') !== false) ? 'success' : 'error' ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
         <?php endif; ?>
 
         <form method="POST" action="">
