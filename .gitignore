@@ -11,3 +11,6 @@ Thumbs.db
 
 # fichiers temporaires
 *.tmp
+
+# MongoDB credentials
+config/mongodb.php
