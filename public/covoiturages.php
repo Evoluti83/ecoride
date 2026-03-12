@@ -17,20 +17,29 @@ $limit = 10;  // Nombre de trajets par page
 $offset = ($page - 1) * $limit;
 
 // Construction de la requête SQL avec filtres
-$sql = "SELECT * FROM rides WHERE departure_city LIKE :departure AND arrival_city LIKE :arrival";
+$sql = "SELECT rides.*, vehicles.energy,
+               (vehicles.energy = 'electrique') AS ecological
+        FROM rides
+        JOIN vehicles ON rides.vehicle_id = vehicles.id
+        WHERE rides.departure_city LIKE :departure
+          AND rides.arrival_city   LIKE :arrival
+          AND rides.available_seats > 0
+          AND rides.status = 'pending'";
 
-// Ajouter des filtres supplémentaires à la requête si spécifiés
+if ($date) {
+    $sql .= " AND DATE(rides.departure_time) = :date";
+}
 if ($price) {
-    $sql .= " AND price <= :price";
+    $sql .= " AND rides.price <= :price";
 }
 if ($ecology !== '') {
-    $sql .= " AND ecological = :ecology";
+    $sql .= " AND (vehicles.energy = 'electrique') = :ecology";
 }
 if ($duration) {
-    $sql .= " AND duration <= :duration";
+    $sql .= " AND rides.duration <= :duration";
 }
 if ($rating) {
-    $sql .= " AND rating >= :rating";
+    $sql .= " AND rides.rating >= :rating";
 }
 
 // Ajouter la pagination à la requête SQL
@@ -44,6 +53,10 @@ $params = [
     'departure' => "%$departure%",
     'arrival' => "%$arrival%"
 ];
+
+if ($date) {
+    $params['date'] = $date;
+}
 
 // Ajouter les filtres aux paramètres SQL si définis
 if ($price) {
@@ -148,8 +161,12 @@ $totalPages = ceil($totalRides / $limit);
 
                     <br><br>
 
-                    <a href="book-ride.php?ride_id=<?= htmlspecialchars($ride['id']) ?>">
-                        Réserver
+                    <a href="ride-detail.php?ride_id=<?= (int)$ride['id'] ?>">
+                    Détail
+                    </a>
+                    &nbsp;
+                    <a href="book-ride.php?ride_id=<?= (int)$ride['id'] ?>">
+                    Réserver
                     </a>
 
                 </li>
