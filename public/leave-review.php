@@ -1,8 +1,8 @@
 <?php
-
 session_start();
 require_once "../config/database.php";
 
+// Vérification si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit;
@@ -16,6 +16,7 @@ if (!$rideId) {
     exit;
 }
 
+// Récupérer les détails du trajet pour lequel on laisse un avis
 $sqlRide = "SELECT * FROM rides WHERE id = :ride_id";
 $stmtRide = $pdo->prepare($sqlRide);
 $stmtRide->execute(['ride_id' => $rideId]);
@@ -32,7 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rating = $_POST['rating'] ?? null;
     $comment = $_POST['comment'] ?? '';
 
+    // Vérification que tous les champs sont remplis
     if ($rating && !empty($comment)) {
+        // Insertion de l'avis dans la base de données avec le statut 'pending'
         $sqlReview = "INSERT INTO reviews (ride_id, author_id, driver_id, rating, comment, status)
                       VALUES (:ride_id, :author_id, :driver_id, :rating, :comment, 'pending')";
 
@@ -50,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Veuillez compléter tous les champs.";
     }
 }
-
 ?>
 
 <!DOCTYPE html>

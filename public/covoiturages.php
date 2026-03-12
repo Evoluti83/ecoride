@@ -2,21 +2,59 @@
 
 require_once "../config/database.php";
 
+// Récupérer les valeurs des filtres depuis l'URL
 $departure = $_GET['departure'] ?? '';
 $arrival = $_GET['arrival'] ?? '';
 $date = $_GET['date'] ?? '';
+$price = $_GET['price'] ?? '';
+$ecology = $_GET['ecology'] ?? '';
+$duration = $_GET['duration'] ?? '';
+$rating = $_GET['rating'] ?? '';
 
-$sql = "SELECT * FROM rides 
-        WHERE departure_city LIKE :departure 
-        AND arrival_city LIKE :arrival";
+// Construction de la requête SQL avec filtres
+$sql = "SELECT * FROM rides WHERE departure_city LIKE :departure AND arrival_city LIKE :arrival";
 
+// Ajouter des filtres supplémentaires à la requête si spécifiés
+if ($price) {
+    $sql .= " AND price <= :price";
+}
+if ($ecology !== '') {
+    $sql .= " AND ecological = :ecology";
+}
+if ($duration) {
+    $sql .= " AND duration <= :duration";
+}
+if ($rating) {
+    $sql .= " AND rating >= :rating";
+}
+
+// Préparer la requête SQL
 $stmt = $pdo->prepare($sql);
 
-$stmt->execute([
+// Lier les paramètres de la requête SQL
+$params = [
     'departure' => "%$departure%",
     'arrival' => "%$arrival%"
-]);
+];
 
+// Ajouter les filtres aux paramètres SQL si définis
+if ($price) {
+    $params['price'] = $price;
+}
+if ($ecology !== '') {
+    $params['ecology'] = $ecology;
+}
+if ($duration) {
+    $params['duration'] = $duration;
+}
+if ($rating) {
+    $params['rating'] = $rating;
+}
+
+// Exécuter la requête
+$stmt->execute($params);
+
+// Récupérer tous les trajets correspondant aux filtres
 $rides = $stmt->fetchAll();
 
 ?>
@@ -24,58 +62,85 @@ $rides = $stmt->fetchAll();
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Résultats covoiturage</title>
-<link rel="stylesheet" href="../assets/css/style.css">
+    <meta charset="UTF-8">
+    <title>Résultats covoiturage</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
-
 <body>
 
 <header class="site-header">
-<h1>EcoRide</h1>
+    <h1>EcoRide</h1>
 </header>
 
 <main class="container">
 
-<h2>Résultats de recherche</h2>
+    <!-- Formulaire de recherche avec filtres -->
+    <h2>Rechercher un trajet</h2>
+    <form method="GET" action="covoiturages.php">
+        <label for="departure">Ville de départ :</label>
+        <input type="text" name="departure" id="departure" value="<?= htmlspecialchars($departure) ?>">
 
-<?php if(empty($rides)): ?>
+        <label for="arrival">Ville d'arrivée :</label>
+        <input type="text" name="arrival" id="arrival" value="<?= htmlspecialchars($arrival) ?>">
 
-<p>Aucun trajet trouvé.</p>
+        <label for="price">Prix max :</label>
+        <input type="number" name="price" id="price" min="0" value="<?= htmlspecialchars($price) ?>">
 
-<?php else: ?>
+        <label for="ecology">Trajet écologique :</label>
+        <select name="ecology" id="ecology">
+            <option value="">Tous</option>
+            <option value="1" <?= $ecology == '1' ? 'selected' : '' ?>>Oui</option>
+            <option value="0" <?= $ecology == '0' ? 'selected' : '' ?>>Non</option>
+        </select>
 
-<ul>
+        <label for="duration">Durée max (minutes) :</label>
+        <input type="number" name="duration" id="duration" min="0" value="<?= htmlspecialchars($duration) ?>">
 
-<?php foreach($rides as $ride): ?>
+        <label for="rating">Note min :</label>
+        <input type="number" name="rating" id="rating" min="1" max="5" value="<?= htmlspecialchars($rating) ?>">
 
-<li>
+        <button type="submit">Rechercher</button>
+    </form>
 
-<strong>
-<?= htmlspecialchars($ride['departure_city']) ?>
-→
-<?= htmlspecialchars($ride['arrival_city']) ?>
-</strong>
+    <!-- Affichage des résultats -->
+    <h2>Résultats de recherche</h2>
 
-<br>
-Prix : <?= $ride['price'] ?> crédits
+    <?php if (empty($rides)): ?>
 
-<br>
-Places disponibles : <?= $ride['available_seats'] ?>
+        <p>Aucun trajet trouvé.</p>
 
-<br><br>
+    <?php else: ?>
 
-<a href="book-ride.php?ride_id=<?= $ride['id'] ?>">
-Réserver
-</a>
+        <ul>
 
-</li>
+            <?php foreach ($rides as $ride): ?>
 
-<?php endforeach; ?>
+                <li>
+                    <strong>
+                        <?= htmlspecialchars($ride['departure_city']) ?>
+                        →
+                        <?= htmlspecialchars($ride['arrival_city']) ?>
+                    </strong>
 
-</ul>
+                    <br>
+                    Prix : <?= htmlspecialchars($ride['price']) ?> crédits
 
-<?php endif; ?>
+                    <br>
+                    Places disponibles : <?= htmlspecialchars($ride['available_seats']) ?>
+
+                    <br><br>
+
+                    <a href="book-ride.php?ride_id=<?= htmlspecialchars($ride['id']) ?>">
+                        Réserver
+                    </a>
+
+                </li>
+
+            <?php endforeach; ?>
+
+        </ul>
+
+    <?php endif; ?>
 
 </main>
 
