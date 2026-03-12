@@ -1,26 +1,24 @@
 <?php
-
 session_start();
-
-// Ajouter un message flash de déconnexion
-$_SESSION['message'] = "Vous êtes maintenant déconnecté.";
-
-// Sécurisation de la suppression du cookie "remember_me" (avec 'secure' et 'HttpOnly' pour la sécurité)
+ 
+// 1. Régénérer l'ID AVANT de détruire (protection fixation de session)
+session_regenerate_id(true);
+ 
+// 2. Supprimer le cookie "remember_me" de façon sécurisée
 if (isset($_COOKIE['remember_me'])) {
-    setcookie('remember_me', '', time() - 3600, '/', '', true, true); // Expire le cookie immédiatement, avec les paramètres sécurisés
+    setcookie('remember_me', '', time() - 3600, '/', '', true, true);
+    unset($_COOKIE['remember_me']);
 }
-
-// Supprimer toutes les données de session
+ 
+// 3. Vider puis détruire la session
 session_unset();
-
-// Détruire la session
 session_destroy();
-
-// Renouveler l'ID de session pour éviter les attaques de fixation de session
-session_regenerate_id();
-
-// Rediriger vers la page de connexion
+ 
+// 4. Rediriger vers login avec message flash
+// On recrée une session minimale juste pour le message
+session_start();
+$_SESSION['success_message'] = "Vous êtes maintenant déconnecté.";
+ 
 header("Location: login.php");
 exit;
-
 ?>

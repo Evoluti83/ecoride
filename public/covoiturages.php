@@ -11,15 +11,6 @@ $ecology = $_GET['ecology'] ?? '';
 $duration = $_GET['duration'] ?? '';
 $rating = $_GET['rating'] ?? '';
 
-// Validation et sécurisation des entrées utilisateur
-$departure = htmlspecialchars($departure);
-$arrival = htmlspecialchars($arrival);
-$date = htmlspecialchars($date);
-$price = is_numeric($price) ? (int) $price : '';  // Assurer que price est un nombre
-$ecology = $ecology === '1' || $ecology === '0' ? $ecology : '';
-$duration = is_numeric($duration) ? (int) $duration : '';
-$rating = is_numeric($rating) && $rating >= 1 && $rating <= 5 ? (int) $rating : '';
-
 // Pagination : déterminer la page actuelle et le nombre d'éléments par page
 $page = $_GET['page'] ?? 1;
 $limit = 10;  // Nombre de trajets par page
@@ -43,7 +34,7 @@ if ($rating) {
 }
 
 // Ajouter la pagination à la requête SQL
-$sql .= " LIMIT :limit OFFSET :offset";
+$sql .= " LIMIT $limit OFFSET $offset"; // Ne pas lier LIMIT et OFFSET, les traiter comme des variables normales
 
 // Préparer la requête SQL
 $stmt = $pdo->prepare($sql);
@@ -51,9 +42,7 @@ $stmt = $pdo->prepare($sql);
 // Lier les paramètres de la requête SQL
 $params = [
     'departure' => "%$departure%",
-    'arrival' => "%$arrival%",
-    'limit' => $limit,
-    'offset' => $offset
+    'arrival' => "%$arrival%"
 ];
 
 // Ajouter les filtres aux paramètres SQL si définis
@@ -172,15 +161,15 @@ $totalPages = ceil($totalRides / $limit);
         <!-- Pagination -->
         <div class="pagination">
             <?php if ($page > 1): ?>
-                <a href="covoiturages.php?page=<?= $page - 1 ?>">&laquo; Précédent</a>
+                <a href="covoiturages.php?page=<?= $page - 1 ?>&departure=<?= urlencode($departure) ?>&arrival=<?= urlencode($arrival) ?>&price=<?= urlencode($price) ?>&ecology=<?= urlencode($ecology) ?>&duration=<?= urlencode($duration) ?>&rating=<?= urlencode($rating) ?>">&laquo; Précédent</a>
             <?php endif; ?>
 
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="covoiturages.php?page=<?= $i ?>" <?= ($i == $page) ? 'class="active"' : '' ?>><?= $i ?></a>
+                <a href="covoiturages.php?page=<?= $i ?>&departure=<?= urlencode($departure) ?>&arrival=<?= urlencode($arrival) ?>&price=<?= urlencode($price) ?>&ecology=<?= urlencode($ecology) ?>&duration=<?= urlencode($duration) ?>&rating=<?= urlencode($rating) ?>" <?= ($i == $page) ? 'class="active"' : '' ?>><?= $i ?></a>
             <?php endfor; ?>
 
             <?php if ($page < $totalPages): ?>
-                <a href="covoiturages.php?page=<?= $page + 1 ?>">Suivant &raquo;</a>
+                <a href="covoiturages.php?page=<?= $page + 1 ?>&departure=<?= urlencode($departure) ?>&arrival=<?= urlencode($arrival) ?>&price=<?= urlencode($price) ?>&ecology=<?= urlencode($ecology) ?>&duration=<?= urlencode($duration) ?>&rating=<?= urlencode($rating) ?>">Suivant &raquo;</a>
             <?php endif; ?>
         </div>
 

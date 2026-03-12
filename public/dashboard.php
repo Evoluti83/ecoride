@@ -1,141 +1,128 @@
 <?php
 session_start();
 require_once "../config/database.php";
-
-$message = "";
-
+ 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit;
 }
-
+ 
 $user = $_SESSION['user'];
-
-/*
-    On récupère les véhicules de l'utilisateur connecté
-*/
+ 
+// ✅ Rafraîchir les crédits depuis la BDD (évite les données de session obsolètes)
+$sqlRefresh = "SELECT credits, role FROM users WHERE id = :id";
+$stmtRefresh = $pdo->prepare($sqlRefresh);
+$stmtRefresh->execute(['id' => $user['id']]);
+$freshUser = $stmtRefresh->fetch();
+$_SESSION['user']['credits'] = $freshUser['credits'];
+$user['credits'] = $freshUser['credits'];
+ 
+// ✅ Récupérer les véhicules de l'utilisateur
 $sqlVehicles = "SELECT * FROM vehicles WHERE user_id = :user_id";
 $stmtVehicles = $pdo->prepare($sqlVehicles);
 $stmtVehicles->execute(['user_id' => $user['id']]);
 $vehicles = $stmtVehicles->fetchAll();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $vehicleId = $_POST['vehicle_id'] ?? '';
-    $departureCity = trim($_POST['departure_city'] ?? '');
-    $arrivalCity = trim($_POST['arrival_city'] ?? '');
-    $departureTime = $_POST['departure_time'] ?? '';
-    $arrivalTime = $_POST['arrival_time'] ?? '';
-    $price = $_POST['price'] ?? '';
-    $availableSeats = $_POST['available_seats'] ?? '';
-    $ecological = isset($_POST['ecological']) ? 1 : 0;
-
-    // Validation des données
-    if (
-        !empty($vehicleId) &&
-        !empty($departureCity) &&
-        !empty($arrivalCity) &&
-        !empty($departureTime) &&
-        !empty($arrivalTime) &&
-        $price !== '' &&
-        $availableSeats !== '' &&
-        is_numeric($price) &&
-        is_numeric($availableSeats) &&
-        strtotime($departureTime) !== false &&
-        strtotime($arrivalTime) !== false
-    ) {
-        try {
-            // Début de la transaction
-            $pdo->beginTransaction();
-
-            // Insertion du trajet
-            $sql = "INSERT INTO rides 
-                (driver_id, vehicle_id, departure_city, arrival_city, departure_time, arrival_time, price, available_seats, ecological)
-                VALUES
-                (:driver_id, :vehicle_id, :departure_city, :arrival_city, :departure_time, :arrival_time, :price, :available_seats, :ecological)";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                'driver_id' => $user['id'],
-                'vehicle_id' => $vehicleId,
-                'departure_city' => htmlspecialchars($departureCity),
-                'arrival_city' => htmlspecialchars($arrivalCity),
-                'departure_time' => $departureTime,
-                'arrival_time' => $arrivalTime,
-                'price' => $price,
-                'available_seats' => $availableSeats,
-                'ecological' => $ecological
-            ]);
-
-            // Commit de la transaction
-            $pdo->commit();
-            $message = "Trajet créé avec succès !";
-
-        } catch (Exception $e) {
-            // Rollback en cas d'erreur
-            $pdo->rollBack();
-            $message = "Une erreur est survenue lors de la création du trajet. Veuillez réessayer plus tard.";
-        }
-    } else {
-        $message = "Veuillez remplir tous les champs obligatoires avec des valeurs valides.";
-    }
-}
+ 
+// ✅ Récupérer les réservations de l'utilisateur (manquait complètement)
+$sqlBookings = "
+    SELECT
+        bookings.id,
+        bookings.status         AS booking_status,
+        bookings.booking_date,
+        rides.departure_city,
+        rides.arrival_city,
+        rides.departure_time,
+        rides.price,
+        rides.id                AS ride_id
+    FROM bookings
+    JOIN rides ON bookings.ride_id = rides.id
+    WHERE bookings.user_id = :user_id
+    ORDER BY bookings.booking_date DESC
+";
+$stmtBookings = $pdo->prepare($sqlBookings);
+$stmtBookings->execute(['user_id' => $user['id']]);
+$bookings = $stmtBookings->fetchAll();
+ 
+// ✅ Récupérer les trajets proposés par l'utilisateur (manquait complètement)
+$sqlMyRides = "
+    SELECT
+        rides.*,
+        vehicles.brand,
+        vehicles.model,
+        vehicles.energy
+    FROM rides
+    JOIN vehicles ON rides.vehicle_id = vehicles.id
+    WHERE rides.driver_id = :driver_id
+    ORDER BY rides.departure_time DESC
+";
+$stmtMyRides = $pdo->prepare($sqlMyRides);
+$stmtMyRides->execute(['driver_id' => $user['id']]);
+$myRides = $stmtMyRides->fetchAll();
 ?>
-
+ 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoRide - Tableau de bord</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-
+ 
 <header class="site-header">
     <div class="container">
         <h1>EcoRide</h1>
-        <p>Bienvenue <?= htmlspecialchars($user['pseudo']) ?></p>
+        <nav>
+            <a href="index.php">Accueil</a> |
+            <a href="covoiturages.php">Covoiturages</a> |
+            <a href="dashboard.php">Mon espace</a> |
+            <a href="logout.php">Se déconnecter</a>
+        </nav>
     </div>
 </header>
-
+ 
 <main class="container">
+ 
     <!-- Messages flash -->
     <?php if (isset($_SESSION['success_message'])): ?>
         <div class="alert success">
-            <?= $_SESSION['success_message']; ?>
+            <?= htmlspecialchars($_SESSION['success_message']) ?>
         </div>
         <?php unset($_SESSION['success_message']); ?>
     <?php endif; ?>
-    
+ 
     <?php if (isset($_SESSION['error_message'])): ?>
         <div class="alert error">
-            <?= $_SESSION['error_message']; ?>
+            <?= htmlspecialchars($_SESSION['error_message']) ?>
         </div>
         <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
-
+ 
+    <!-- Infos utilisateur -->
     <section class="search-card">
-        <h2>Mon espace</h2>
+        <h2>Bienvenue, <?= htmlspecialchars($user['pseudo']) ?> 👋</h2>
         <p><strong>Email :</strong> <?= htmlspecialchars($user['email']) ?></p>
         <p><strong>Rôle :</strong> <?= htmlspecialchars($user['role']) ?></p>
-        <p><strong>Crédits :</strong> <?= htmlspecialchars($user['credits']) ?></p>
-
-        <p>
-            <a href="index.php">Rechercher un trajet</a>
-        </p>
-
-        <p>
-            <a href="create-ride.php">Proposer un trajet</a>
-        </p>
-
-        <p>
-            <a href="logout.php">Se déconnecter</a>
-        </p>
+        <p><strong>Crédits :</strong> <?= htmlspecialchars($user['credits']) ?> 💳</p>
+ 
+        <div class="actions">
+            <a href="index.php" class="btn">Rechercher un trajet</a>
+            <a href="create-ride.php" class="btn">Proposer un trajet</a>
+            <?php if ($user['role'] === 'employee'): ?>
+                <a href="manage-reviews.php" class="btn">Gérer les avis</a>
+            <?php endif; ?>
+            <?php if ($user['role'] === 'admin'): ?>
+                <a href="admin.php" class="btn">Espace admin</a>
+            <?php endif; ?>
+        </div>
     </section>
-
+ 
+    <!-- Mes réservations -->
     <section class="search-card">
         <h2>Mes réservations</h2>
-
+ 
         <?php if (empty($bookings)): ?>
             <p>Aucune réservation enregistrée.</p>
         <?php else: ?>
@@ -148,28 +135,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?= htmlspecialchars($booking['arrival_city']) ?>
                         </strong>
                         <br>
-                        Date du trajet : <?= htmlspecialchars($booking['departure_time']) ?>
+                        Départ : <?= htmlspecialchars($booking['departure_time']) ?>
                         <br>
                         Prix : <?= htmlspecialchars($booking['price']) ?> crédits
                         <br>
-                        Statut : <?= htmlspecialchars($booking['status']) ?>
+                        Statut : <?= htmlspecialchars($booking['booking_status']) ?>
                         <br>
                         Réservé le : <?= htmlspecialchars($booking['booking_date']) ?>
+                        <br>
+                        <!-- Laisser un avis si le trajet est terminé -->
+                        <?php if ($booking['booking_status'] === 'completed'): ?>
+                            <a href="leave-review.php?ride_id=<?= (int)$booking['ride_id'] ?>">
+                                Laisser un avis
+                            </a>
+                        <?php endif; ?>
                     </li>
                     <br>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
     </section>
-
+ 
+    <!-- Mes trajets proposés -->
     <section class="search-card">
         <h2>Mes trajets proposés</h2>
-
+ 
         <?php if (empty($myRides)): ?>
             <p>Aucun trajet proposé pour le moment.</p>
         <?php else: ?>
             <ul>
                 <?php foreach ($myRides as $ride): ?>
+                    <?php $isEco = $ride['energy'] === 'electrique'; ?>
                     <li>
                         <strong>
                             <?= htmlspecialchars($ride['departure_city']) ?>
@@ -181,18 +177,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <br>
                         Arrivée : <?= htmlspecialchars($ride['arrival_time']) ?>
                         <br>
+                        Véhicule : <?= htmlspecialchars($ride['brand']) ?> <?= htmlspecialchars($ride['model']) ?>
+                        <br>
                         Prix : <?= htmlspecialchars($ride['price']) ?> crédits
                         <br>
                         Places disponibles : <?= htmlspecialchars($ride['available_seats']) ?>
                         <br>
-                        Écologique : <?= $ride['ecological'] ? 'Oui' : 'Non' ?>
+                        Écologique : <?= $isEco ? '🌿 Oui' : 'Non' ?>
+                        <br>
+                        Statut : <?= htmlspecialchars($ride['status']) ?>
                     </li>
                     <br>
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
     </section>
+ 
 </main>
-
+ 
 </body>
 </html>
