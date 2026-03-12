@@ -35,6 +35,10 @@ $user = $_SESSION['user'];
         <p><strong>Crédits :</strong> <?= htmlspecialchars($user['credits']) ?></p>
 
         <p>
+    <a href="create-ride.php">Proposer un trajet</a>
+        </p>
+        
+        <p>
             <a href="logout.php">Se déconnecter</a>
         </p>
     </section>
