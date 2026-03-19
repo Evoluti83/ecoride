@@ -1,35 +1,66 @@
-🌿 EcoRide — Plateforme de covoiturage écologique
-EcoRide est une application web de covoiturage développée dans le cadre du titre professionnel Développeur Web et Web Mobile (DWWM).
+# 🌿 EcoRide — Plateforme de covoiturage écologique
 
-🚀 Stack technique
-ÉlémentTechnologieFront-endHTML5, CSS3, JavaScriptBack-endPHP 8.2 (natif, PDO)Base de données relationnelleMariaDB (XAMPP)Base de données NoSQLMongoDB AtlasLibrairie MongoDBmongodb/mongodb 1.19.1 (Composer)GraphiquesChart.jsVersioningGit / GitHub
+EcoRide est une application web de covoiturage développée dans le cadre du titre professionnel **Développeur Web et Web Mobile (DWWM)**.
 
-⚙️ Installation en local
-Prérequis
+🔗 **Application en ligne** : https://sheltered-wildwood-22203-3a0c68434854.herokuapp.com/
 
-XAMPP (PHP 8.2 + MariaDB)
-Composer
-Git
+---
 
-1. Cloner le projet
-bashgit clone https://github.com/TON_COMPTE/ecoride.git
+## 🚀 Stack technique
+
+| Élément | Technologie |
+|---------|------------|
+| Front-end | HTML5, CSS3, JavaScript |
+| Back-end | PHP 8.2 (natif, PDO) |
+| Base de données relationnelle | MariaDB (XAMPP) |
+| Base de données NoSQL | MongoDB Atlas |
+| Librairie MongoDB | mongodb/mongodb 1.19.1 (Composer) |
+| Graphiques | Chart.js |
+| Déploiement | Heroku + JawsDB |
+| Versioning | Git / GitHub |
+
+---
+
+## ⚙️ Installation en local
+
+### Prérequis
+- [XAMPP](https://www.apachefriends.org/) (PHP 8.2 + MariaDB)
+- [Composer](https://getcomposer.org/)
+- [Git](https://git-scm.com/)
+
+### 1. Cloner le projet
+
+```bash
+git clone https://github.com/Evoluti62/ecoride.git
 cd ecoride
-2. Installer les dépendances PHP
-bashcomposer install
-3. Installer l'extension MongoDB pour PHP
+```
 
-Télécharger php_mongodb-1.19.x-8.2-ts-vs16-x64.zip sur pecl.php.net
-Copier php_mongodb.dll dans C:/xampp/php/ext/
-Ajouter extension=mongodb dans C:/xampp/php/php.ini
-Redémarrer Apache
+### 2. Installer les dépendances PHP
 
-4. Créer la base de données MySQL
-Dans phpMyAdmin ou via la ligne de commande :
-bashmysql -u root -p < sql/ecoride_create.sql
+```bash
+composer install
+```
+
+### 3. Installer l'extension MongoDB pour PHP
+
+1. Télécharger `php_mongodb-1.19.x-8.2-ts-vs16-x64.zip` sur [pecl.php.net](https://pecl.php.net/package/mongodb)
+2. Copier `php_mongodb.dll` dans `C:/xampp/php/ext/`
+3. Ajouter `extension=mongodb` dans `C:/xampp/php/php.ini`
+4. Redémarrer Apache
+
+### 4. Créer la base de données MySQL
+
+```bash
+mysql -u root -p < sql/ecoride_create.sql
 mysql -u root -p < sql/ecoride_data.sql
-5. Configurer MongoDB
-Créer le fichier config/mongodb.php (non versionné pour des raisons de sécurité) :
-php<?php
+```
+
+### 5. Configurer MongoDB
+
+Créer le fichier `config/mongodb.php` (non versionné pour des raisons de sécurité) :
+
+```php
+<?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $mongoUri = "mongodb+srv://<username>:<password>@<cluster>.mongodb.net/ecoride?retryWrites=true&w=majority";
@@ -41,31 +72,39 @@ try {
 } catch (Exception $e) {
     die("Erreur MongoDB : " . $e->getMessage());
 }
+```
 
-Remplace <username>, <password> et <cluster> par tes valeurs MongoDB Atlas.
+### 6. Lancer l'application
 
-6. Lancer l'application
+1. Démarre **Apache** et **MySQL** dans XAMPP
+2. Accède à : http://localhost/ecoride/public/
 
-Démarre Apache et MySQL dans XAMPP
-Accède à : http://localhost/ecoride/public/
+---
 
+## 👤 Comptes de test
 
-👤 Comptes de test
-RôleEmailMot de passeAdministrateuradmin@ecoride.frpasswordEmployéemploye@ecoride.frpasswordChauffeurcarlos@test.frpasswordPassagerdiane@test.frpassword
+| Rôle | Email | Mot de passe |
+|------|-------|-------------|
+| Administrateur | admin@ecoride.fr | password |
+| Employé | employe@ecoride.fr | password |
+| Chauffeur | carlos@test.fr | password |
+| Passager | diane@test.fr | password |
 
-⚠️ Le compte administrateur ne peut pas être créé depuis l'application. Il doit être inséré directement en base de données.
+> ⚠️ Le compte administrateur ne peut pas être créé depuis l'application. Il doit être inséré directement en base de données.
 
+---
 
-📁 Structure du projet
+## 📁 Structure du projet
+
+```
 ecoride/
-├── assets/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
 ├── config/
 │   ├── database.php        ← connexion MySQL
 │   └── mongodb.php         ← connexion MongoDB (non versionné)
-├── public/                 ← pages PHP
+├── public/                 ← pages PHP + assets
+│   ├── assets/
+│   │   ├── css/style.css
+│   │   └── js/
 │   ├── index.php
 │   ├── login.php
 │   ├── register.php
@@ -84,6 +123,7 @@ ecoride/
 │   ├── admin.php
 │   ├── add-vehicle.php
 │   ├── preferences.php
+│   ├── forgot-password.php
 │   └── logout.php
 ├── sql/
 │   ├── ecoride_create.sql  ← structure de la base
@@ -92,29 +132,35 @@ ecoride/
 ├── .gitignore
 ├── composer.json
 ├── composer.lock
+├── Procfile                ← configuration Heroku
 └── README.md
+```
 
-🔒 Sécurité
+---
 
-Mots de passe hashés avec password_hash() (bcrypt)
-Requêtes préparées PDO (protection injection SQL)
-htmlspecialchars() sur toutes les sorties (protection XSS)
-Cookie remember_me avec flags Secure et HttpOnly
-Vérification des rôles sur chaque page protégée
-Transactions PDO pour les opérations critiques (réservation, annulation)
+## 🔒 Sécurité
 
+- Mots de passe hashés avec `password_hash()` (bcrypt)
+- Requêtes préparées PDO (protection injection SQL)
+- `htmlspecialchars()` sur toutes les sorties (protection XSS)
+- Cookie `remember_me` avec flags `Secure` et `HttpOnly`
+- Vérification des rôles sur chaque page protégée
+- Transactions PDO pour les opérations critiques (réservation, annulation)
 
-🌿 Fonctionnalités
+---
 
-Recherche de covoiturages par ville et date
-Filtres : prix, durée, note minimale, écologique
-Réservation avec système de crédits
-Espace chauffeur : proposer un trajet, gérer ses véhicules
-Espace passager : historique, annulation, avis
-Avis stockés dans MongoDB, validés par les employés
-Espace admin : graphiques, gestion des comptes, suspension
-Déploiement sur [lien de déploiement]
+## 🌿 Fonctionnalités
 
+- Recherche de covoiturages par ville et date
+- Filtres : prix, durée, note minimale, écologique
+- Réservation avec système de crédits
+- Espace chauffeur : proposer un trajet, gérer ses véhicules
+- Espace passager : historique, annulation, avis
+- Avis stockés dans MongoDB, validés par les employés
+- Espace admin : graphiques, gestion des comptes, suspension
 
-📊 Gestion de projet
+---
+
+## 📊 Gestion de projet
+
 Kanban disponible ici : [lien Trello/Notion/Jira]
