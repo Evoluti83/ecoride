@@ -148,8 +148,14 @@ $totalPages = ceil($totalRides / $limit);
 
                     <br><br>
 
-                    <a href="book-ride.php?ride_id=<?= htmlspecialchars($ride['id']) ?>">
-                        Réserver
+                    <a href="ride-detail.php?ride_id=<?= (int)$ride['id'] ?>">
+                    Détail
+                    </a>
+                    
+                    &nbsp;
+
+                    <a href="book-ride.php?ride_id=<?= (int)$ride['id'] ?>">
+                    Réserver
                     </a>
 
                 </li>
