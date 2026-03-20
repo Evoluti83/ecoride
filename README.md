@@ -163,4 +163,4 @@ ecoride/
 
 ## 📊 Gestion de projet
 
-Kanban disponible ici : [lien Trello/Notion/Jira]
+Kanban disponible ici : https://trello.com/b/7IdOcz7X/ecoride-gestion-de-projet
