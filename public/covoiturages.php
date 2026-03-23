@@ -99,9 +99,7 @@ $totalPages = ceil($totalRides / $limit);
 </head>
 <body>
 
-<header class="site-header">
-    <h1>EcoRide</h1>
-</header>
+<?php require_once "navbar.php"; ?>
 
 <main class="container">
 

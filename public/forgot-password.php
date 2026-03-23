@@ -9,11 +9,7 @@ session_start();
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-<header class="site-header">
-    <div class="container">
-        <h1>EcoRide</h1>
-    </div>
-</header>
+<?php require_once "navbar.php"; ?>
 <main class="container">
     <section class="search-card">
         <h2>Mot de passe oublié</h2>

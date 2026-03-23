@@ -11,9 +11,7 @@ session_start();
 </head>
 <body>
 
-<header class="site-header">
-    <h1>EcoRide - Erreur</h1>
-</header>
+<?php require_once "navbar.php"; ?>
 
 <main class="container">
     <h2>Oups ! Une erreur est survenue</h2>

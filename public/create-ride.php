@@ -92,12 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<header class="site-header">
-    <div class="container">
-        <h1>EcoRide</h1>
-        <p>Proposer un trajet</p>
-    </div>
-</header>
+<?php require_once "navbar.php"; ?>
 
 <main class="container">
     <section class="search-card">

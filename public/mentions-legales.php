@@ -12,14 +12,7 @@ session_start();
 </head>
 <body>
 
-<header class="site-header">
-    <div class="container">
-        <h1>🌿 EcoRide</h1>
-        <nav style="margin-top: 15px;">
-            <a href="index.php" style="color: white; margin-right: 20px; text-decoration: none;">← Retour à l'accueil</a>
-        </nav>
-    </div>
-</header>
+<?php require_once "navbar.php"; ?>
 
 <main class="container" style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
 

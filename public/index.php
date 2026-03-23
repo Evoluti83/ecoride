@@ -199,23 +199,7 @@ require_once "../config/database.php";
 </head>
 <body>
 
-<header class="site-header">
-    <div class="container">
-        <h1>🌿 EcoRide</h1>
-        <p>La plateforme de covoiturage écologique</p>
-        <nav style="margin-top: 15px;">
-            <a href="index.php" style="color: white; margin-right: 20px; text-decoration: none;">Accueil</a>
-            <a href="covoiturages.php" style="color: white; margin-right: 20px; text-decoration: none;">Covoiturages</a>
-            <?php if (isset($_SESSION['user'])): ?>
-                <a href="dashboard.php" style="color: white; margin-right: 20px; text-decoration: none;">Mon espace</a>
-                <a href="logout.php" style="color: white; text-decoration: none;">Déconnexion</a>
-            <?php else: ?>
-                <a href="login.php" style="color: white; margin-right: 20px; text-decoration: none;">Connexion</a>
-                <a href="register.php" style="color: #A5D6A7; text-decoration: none; font-weight: bold;">Inscription</a>
-            <?php endif; ?>
-        </nav>
-    </div>
-</header>
+<?php require_once "navbar.php"; ?>
 
 <!-- HERO BANNER -->
 <div class="hero-banner">

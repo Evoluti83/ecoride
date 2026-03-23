@@ -84,17 +84,7 @@ $preferences = $stmtPrefs->fetch();
 </head>
 <body>
 
-<header class="site-header">
-    <div class="container">
-        <h1>EcoRide</h1>
-        <nav>
-            <a href="index.php">Accueil</a> |
-            <a href="covoiturages.php">Covoiturages</a> |
-            <a href="dashboard.php">Mon espace</a> |
-            <a href="logout.php">Se déconnecter</a>
-        </nav>
-    </div>
-</header>
+<?php require_once "navbar.php"; ?>
 
 <main class="container">
 

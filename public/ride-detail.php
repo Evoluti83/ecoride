@@ -77,22 +77,7 @@ $preferences = $stmtPrefs->fetchAll();
 </head>
 <body>
  
-<header class="site-header">
-    <div class="container">
-        <h1>EcoRide</h1>
-        <nav>
-            <a href="index.php">Accueil</a> |
-            <a href="covoiturages.php">Covoiturages</a> |
-            <?php if (isset($_SESSION['user'])): ?>
-                <a href="dashboard.php">Mon espace</a> |
-                <a href="logout.php">Se déconnecter</a>
-            <?php else: ?>
-                <a href="login.php">Connexion</a> |
-                <a href="register.php">Inscription</a>
-            <?php endif; ?>
-        </nav>
-    </div>
-</header>
+<?php require_once "navbar.php"; ?>
  
 <main class="container">
  
