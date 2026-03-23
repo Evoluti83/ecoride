@@ -8,6 +8,17 @@ if (session_status() === PHP_SESSION_NONE) {
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
+<style>
+.site-header {
+    background-color: #2e7d32 !important;
+    color: white;
+    padding: 15px 20px;
+}
+.site-header a:hover {
+    background: rgba(255,255,255,0.2) !important;
+}
+</style>
+
 <header class="site-header">
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
