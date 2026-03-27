@@ -147,7 +147,7 @@ $preferences = $stmtPrefs->fetchAll();
     <section class="search-card">
         <?php if ($ride['available_seats'] > 0): ?>
             <?php if (isset($_SESSION['user'])): ?>
-                <a href="book-ride.php?ride_id=<?= (int)$ride['id'] ?>"
+                <a href="confirm-booking.php?ride_id=<?= (int)$ride['id'] ?>"
                    style="display: inline-block; background: #2e7d32; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                     ✅ Participer à ce trajet
                 </a>
