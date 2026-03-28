@@ -136,10 +136,12 @@ $myRides = $stmtMyRides->fetchAll();
 
                         <!-- ✅ US11 : Laisser un avis si terminé -->
                         <?php if ($booking['booking_status'] === 'completed'): ?>
-                            <a href="leave-review.php?ride_id=<?= (int)$booking['ride_id'] ?>">
-                                ⭐ Laisser un avis
+                            <a href="validate-ride.php?booking_id=<?= (int)$booking['id'] ?>"
+                            style="color: #2e7d32; font-weight: bold;">
+                            ✅ Valider le trajet
                             </a>
                         <?php endif; ?>
+                        
                     </li>
                     <br>
                 <?php endforeach; ?>
