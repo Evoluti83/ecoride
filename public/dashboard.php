@@ -212,5 +212,6 @@ $myRides = $stmtMyRides->fetchAll();
 
 </main>
 
+<?php require_once "footer.php"; ?>
 </body>
 </html>

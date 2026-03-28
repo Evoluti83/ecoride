@@ -115,5 +115,6 @@ $pendingReviews = $stmtPendingReviews->fetchAll();
     <?php endif; ?>
 </main>
  
+<?php require_once "footer.php"; ?>
 </body>
 </html>

@@ -285,5 +285,6 @@ new Chart(creditsCtx, {
 });
 </script>
 
+<?php require_once "footer.php"; ?>
 </body>
 </html>

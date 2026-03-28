@@ -328,32 +328,7 @@ require_once "../config/database.php";
 </main>
 
 <!-- FOOTER -->
-<footer class="site-footer">
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>🌿 EcoRide</h4>
-                <p>La plateforme de covoiturage écologique qui valorise les déplacements responsables.</p>
-                <p style="margin-top: 10px;">© EcoRide 2026 — Tous droits réservés</p>
-            </div>
-            <div class="footer-section">
-                <h4>Contact</h4>
-                <a href="mailto:contact@ecoride.fr">📧 contact@ecoride.fr</a>
-                <p>Du lundi au vendredi</p>
-                <p>9h00 - 18h00</p>
-            </div>
-            <div class="footer-section">
-                <h4>Informations légales</h4>
-                <a href="mentions-legales.php">Mentions légales</a>
-                <a href="mentions-legales.php#confidentialite">Politique de confidentialité</a>
-                <a href="mentions-legales.php#cgu">Conditions d'utilisation</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>EcoRide — Plateforme de covoiturage écologique — contact@ecoride.fr — <a href="mentions-legales.php" style="color: #4CAF50;">Mentions légales</a></p>
-        </div>
-    </div>
-</footer>
+<?php require_once "footer.php"; ?>
 
 <script>
     $('#searchForm').on('submit', function(event) {

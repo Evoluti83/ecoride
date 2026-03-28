@@ -17,5 +17,6 @@ session_start();
         <a href="login.php" class="btn">Retour à la connexion</a>
     </section>
 </main>
+<?php require_once "footer.php"; ?>
 </body>
 </html>
