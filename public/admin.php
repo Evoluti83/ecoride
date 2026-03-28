@@ -158,13 +158,17 @@ $creditsData  = json_encode(array_column($creditsPerDay, 'credits_earned'));
     <!-- Graphique 1 : Covoiturages par jour -->
     <section class="search-card">
         <h2>🚗 Covoiturages créés par jour (30 derniers jours)</h2>
-        <canvas id="ridesChart" height="100"></canvas>
+        <div style="height: 300px; position: relative;">
+        <canvas id="ridesChart"></canvas>
+        </div>
     </section>
 
     <!-- Graphique 2 : Crédits gagnés par jour -->
     <section class="search-card">
         <h2>💰 Crédits gagnés par jour (30 derniers jours)</h2>
-        <canvas id="creditsChart" height="100"></canvas>
+        <div style="height: 300px; position: relative;">
+        <canvas id="creditsChart"></canvas>
+        </div>
     </section>
 
     <!-- Créer un employé -->
